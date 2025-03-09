@@ -6,6 +6,9 @@ import numpy as np
 import itertools
 from statsmodels.tsa.arima.model import ARIMA
 
+import warnings
+warnings.simplefilter("ignore")
+
 
 company = input("Enter a company to analyse: ")
 
@@ -71,7 +74,7 @@ bestOrder = tuple(results_df.filter(pl.col("AIC") == results_df["AIC"].min()).se
 model = ARIMA(residuals, order=bestOrder)
 arma_results = model.fit()
 
-
+# Predict the next day
 next_residual = arma_results.forecast(steps=1)[0]
 
 next_trend = trend[-1] 
@@ -79,4 +82,4 @@ next_seasonal = seasonal[-1]
 
 next_value = next_residual * next_trend * next_seasonal
 
-print("Next day price prediction:", next_value)
+print("\n********\n\nNext day price prediction:", next_value)
