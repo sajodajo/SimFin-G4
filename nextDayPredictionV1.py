@@ -1,3 +1,4 @@
+pip install simfin
 import simfin as sf
 from simfin.names import *
 import polars as pl
@@ -82,4 +83,4 @@ next_seasonal = seasonal[-1]
 
 next_value = next_residual * next_trend * next_seasonal
 
-print("\n********\n\nNext day price prediction:", next_value)
+print("\n********\n\nNext day price prediction:", next_value) 
