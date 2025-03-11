@@ -14,16 +14,11 @@ class pySimFin:
         sns.set_style("whitegrid")
 
     def get_share_prices(self,tickers,start,end):       
-        market = 'us'
-        refresh_days_shareprices = 1
-
-        print(f"Tickers: {tickers}, Type: {type(tickers)}")
-
-        hub = sf.StockHub(market=market, tickers=tickers,
-                        refresh_days_shareprices=refresh_days_shareprices)
+        hub = sf.StockHub(market='us', tickers=tickers,
+                        refresh_days_shareprices=1)
 
         df_prices = hub.load_shareprices(variant='daily').sort_index()
-        df_prices = df_prices.loc[(slice(None), slice(start, end)), :]
+        df_prices = df_prices.loc[start:end]
         return df_prices
     
     def get_financial_statement(self,tickers, start, end,period='quarterly'):
