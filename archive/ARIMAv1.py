@@ -1,34 +1,3 @@
-pip install simfin
-import simfin as sf
-from simfin.names import *
-import polars as pl
-from statsmodels.tsa.seasonal import seasonal_decompose
-import numpy as np
-import itertools
-from statsmodels.tsa.arima.model import ARIMA
-
-import warnings
-warnings.simplefilter("ignore")
-
-
-company = input("Enter a company to analyse: ")
-
-sf.set_data_dir('~/simfin_data/')
-sf.set_api_key(api_key='70d5d920-9f9e-4062-9311-1b4df7c98ba4')
-
-shareprices_pd = sf.load(dataset='shareprices', variant='daily', market='us')
-companies_pd = sf.load_companies(market='us')
-
-shareprices = pl.from_pandas(shareprices_pd)
-companies = pl.from_pandas(companies_pd)
-
-shareprices = shareprices.with_columns(pl.col('Date').str.to_datetime('%Y-%m-%d'))
-
-ts_prices = shareprices.filter(pl.col("Ticker") == company).select(['Date',"Close"])
-
-print(f"\n********\n\nShare Price data imported as 'shareprice'\nCompanies data imported as 'companies'\n{company} price data imported as 'ts_prices'")
-
-
 
 ts_prices = ts_prices.with_columns(pl.col("Close").diff().alias("Differenced")).drop_nulls() 
 
@@ -75,7 +44,7 @@ bestOrder = tuple(results_df.filter(pl.col("AIC") == results_df["AIC"].min()).se
 model = ARIMA(residuals, order=bestOrder)
 arma_results = model.fit()
 
-# Predict the next day
+
 next_residual = arma_results.forecast(steps=1)[0]
 
 next_trend = trend[-1] 
@@ -83,4 +52,4 @@ next_seasonal = seasonal[-1]
 
 next_value = next_residual * next_trend * next_seasonal
 
-print("\n********\n\nNext day price prediction:", next_value) 
+print("Next day price prediction:", next_value)
