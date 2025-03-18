@@ -85,9 +85,9 @@ if st.button("Analyze"):
             st.line_chart(residuals)
 
         # Define range of p, d, q for ARMA (d=0) search
-        p = range(0, 10)
+        p = range(0, 3)
         d = [0]  # ARMA model assumption (already differenced/stationary)
-        q = range(0, 10)
+        q = range(0, 3)
 
         results_list = []
         for param in itertools.product(p, d, q):
