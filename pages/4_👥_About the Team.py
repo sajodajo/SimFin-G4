@@ -12,8 +12,16 @@ st.title(f'💫 About the Team\n\n')
 import streamlit as st
 
 
+
+
+st.write('''At Stock Insights Hub, we are proud to be a dynamic, global team bringing a wealth of knowledge and expertise from across the world. Our diverse backgrounds and experiences empower us to innovate and provide unique solutions for stock market analysis, prediction, and strategy optimization. Together, we strive to create cutting-edge tools that enable our users to succeed in the fast-paced world of finance.
+
+Our team consists of experts from a wide range of disciplines, from finance and machine learning to software development and strategy. Each member contributes their own perspective, allowing us to tackle challenges from multiple angles and continuously improve our platform.''')
+
+
 # Create 5 columns
 col1, col2, col3, col4, col5 = st.columns(5)
+
 
 # Column 1
 with col1:
