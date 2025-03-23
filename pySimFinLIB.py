@@ -52,28 +52,12 @@ class pySimFin:
         return cleaned
     
 
-    # def plotFinancialIndex(self, ticker, startDate, endDate):
-    #     pricesDF = self.getStockPrices(ticker, startDate, endDate)
+    def selectSingleStock(self, selected_stock, startDate, endDate):
+        stockData = self.getStockPrices(selected_stock, startDate, endDate)
+        stockDataPrice = stockData['Last Closing Price']
         
-    #     pricesDF['Date'] = pd.to_datetime(pricesDF['Date'])
+        return pd.Series(stockDataPrice)
         
-    #     plt.figure(figsize=(10, 6))
-    #     plt.plot(pricesDF['Date'], pricesDF['Last Closing Price'], label=f'{ticker} Stock Price', color='b', lw=2)
-        
-    #     plt.title(f'{ticker} Stock Price from {startDate} to {endDate}', fontsize=14)
-        
-    #     plt.gca().xaxis.set_major_locator(mdates.MonthLocator(bymonthday=1, interval=3)) 
-    #     plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m')) 
-    
-    #     plt.xlabel('Date', fontsize=12)
-    #     plt.ylabel('Stock Price (USD)', fontsize=12)
-    #     plt.grid(True)
-    #     plt.legend()
-        
-    #     plt.xticks(rotation=45)
-
-    #     plt.tight_layout()
-    #     plt.show()
 
     def selectMultipleStocks(self,selected_stocks, startDate, endDate):
         selectedStocks = {}
@@ -85,25 +69,7 @@ class pySimFin:
             selectedStocks[ticker] = StockDataPrice
 
         return pd.DataFrame(selectedStocks)
-    
-    
-    # def plotMultipleStocks(self,df):
-    #     fig = plt.figure(figsize=(10, 6))
 
-    #     for column in df.columns:
-    #         plt.plot(df.index, df[column], label=column)
-
-    #     plt.title('Selected Stock Prices Over Time', fontsize=14)
-    #     plt.xlabel('Date', fontsize=12)
-    #     plt.ylabel('Price (USD)', fontsize=12)
-    #     plt.legend()
-    #     plt.grid(True)
-
-    #     plt.xticks(rotation=45)
-    #     plt.tight_layout()
-    #     plt.show()
-
-    #     return fig
     
 
     def plotlyMultipleStocks(self, df):
