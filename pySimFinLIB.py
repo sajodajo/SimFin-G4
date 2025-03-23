@@ -52,28 +52,28 @@ class pySimFin:
         return cleaned
     
 
-    def plotFinancialIndex(self, ticker, startDate, endDate):
-        pricesDF = self.getStockPrices(ticker, startDate, endDate)
+    # def plotFinancialIndex(self, ticker, startDate, endDate):
+    #     pricesDF = self.getStockPrices(ticker, startDate, endDate)
         
-        pricesDF['Date'] = pd.to_datetime(pricesDF['Date'])
+    #     pricesDF['Date'] = pd.to_datetime(pricesDF['Date'])
         
-        plt.figure(figsize=(10, 6))
-        plt.plot(pricesDF['Date'], pricesDF['Last Closing Price'], label=f'{ticker} Stock Price', color='b', lw=2)
+    #     plt.figure(figsize=(10, 6))
+    #     plt.plot(pricesDF['Date'], pricesDF['Last Closing Price'], label=f'{ticker} Stock Price', color='b', lw=2)
         
-        plt.title(f'{ticker} Stock Price from {startDate} to {endDate}', fontsize=14)
+    #     plt.title(f'{ticker} Stock Price from {startDate} to {endDate}', fontsize=14)
         
-        plt.gca().xaxis.set_major_locator(mdates.MonthLocator(bymonthday=1, interval=3)) 
-        plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m')) 
+    #     plt.gca().xaxis.set_major_locator(mdates.MonthLocator(bymonthday=1, interval=3)) 
+    #     plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m')) 
     
-        plt.xlabel('Date', fontsize=12)
-        plt.ylabel('Stock Price (USD)', fontsize=12)
-        plt.grid(True)
-        plt.legend()
+    #     plt.xlabel('Date', fontsize=12)
+    #     plt.ylabel('Stock Price (USD)', fontsize=12)
+    #     plt.grid(True)
+    #     plt.legend()
         
-        plt.xticks(rotation=45)
+    #     plt.xticks(rotation=45)
 
-        plt.tight_layout()
-        plt.show()
+    #     plt.tight_layout()
+    #     plt.show()
 
     def selectMultipleStocks(self,selected_stocks, startDate, endDate):
         selectedStocks = {}
@@ -87,23 +87,23 @@ class pySimFin:
         return pd.DataFrame(selectedStocks)
     
     
-    def plotMultipleStocks(self,df):
-        fig = plt.figure(figsize=(10, 6))
+    # def plotMultipleStocks(self,df):
+    #     fig = plt.figure(figsize=(10, 6))
 
-        for column in df.columns:
-            plt.plot(df.index, df[column], label=column)
+    #     for column in df.columns:
+    #         plt.plot(df.index, df[column], label=column)
 
-        plt.title('Selected Stock Prices Over Time', fontsize=14)
-        plt.xlabel('Date', fontsize=12)
-        plt.ylabel('Price (USD)', fontsize=12)
-        plt.legend()
-        plt.grid(True)
+    #     plt.title('Selected Stock Prices Over Time', fontsize=14)
+    #     plt.xlabel('Date', fontsize=12)
+    #     plt.ylabel('Price (USD)', fontsize=12)
+    #     plt.legend()
+    #     plt.grid(True)
 
-        plt.xticks(rotation=45)
-        plt.tight_layout()
-        plt.show()
+    #     plt.xticks(rotation=45)
+    #     plt.tight_layout()
+    #     plt.show()
 
-        return fig
+    #     return fig
     
 
     def plotlyMultipleStocks(self, df):
@@ -127,7 +127,7 @@ class pySimFin:
                 bordercolor='black',  # Border color
                 borderwidth=2  # Border width of the legend
             ),
-            height=800
+            height=400
         )
 
         # Display the plot in Streamlit
