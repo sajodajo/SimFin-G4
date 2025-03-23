@@ -2,3 +2,4 @@ arch
 pandas
 plotly
 dotenv
+matplotlib.pyplot
