@@ -12,27 +12,46 @@ st.set_page_config(
     layout = 'wide'
 )
 
+st.markdown(
+    """
+    <style>
+    .streamlit-expanderHeader {
+        padding: 20px;
+    }
+    .stColumn {
+        padding: 40px;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+
 st.title('Stock Price Analysis')
 
 psf = pySimFin()
 
 companyDF = psf.getCompanyList()
 
+col1, col2 = st.columns(2)
 
-minDate = datetime.date.today() - datetime.timedelta(days=1800)
-maxDate = datetime.date.today() - datetime.timedelta(days=1)
+with col1:
+    ## TIMEFRAME SELECTOR ##
 
-startDate, endDate = st.slider(
-    "Select Date Range",
-    min_value=minDate,
-    max_value=maxDate,
-    value=(minDate, maxDate), 
-    format="YYYY-MM-DD"
-)
+    minDate = datetime.date.today() - datetime.timedelta(days=1800)
+    maxDate = datetime.date.today() - datetime.timedelta(days=1)
 
+    startDate, endDate = st.slider(
+        "Select Date Range",
+        min_value=minDate,
+        max_value=maxDate,
+        value=(minDate, maxDate), 
+        format="YYYY-MM-DD"
+    )
+
+with col2:
 ## STOCK SELECTOR ##
-
-selected_stocks = st.multiselect('Select up to 5 stocks to visualise:', companyDF['name'].sort_values())
+    selected_stocks = st.multiselect('Select up to 5 stocks to visualise:', companyDF['name'].sort_values())
 
 tickerList = psf.tickerFind(selected_stocks,companyDF)
 
