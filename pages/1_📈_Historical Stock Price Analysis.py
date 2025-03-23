@@ -6,9 +6,11 @@ import pandas as pd
 from pySimFinLIB import pySimFin
 import plotly.graph_objects as go
 
-
-
-st.set_page_config(layout = 'wide')
+st.set_page_config(
+    page_title="Stock Price Analysis",
+    page_icon="📈",
+    layout = 'wide'
+)
 
 psf = pySimFin()
 
@@ -24,7 +26,7 @@ startDate, endDate = st.slider(
     "Select Date Range",
     min_value=minDate,
     max_value=maxDate,
-    value=(minDate, maxDate),  # Default value (start date, end date)
+    value=(minDate, maxDate), 
     format="YYYY-MM-DD"
 )
 

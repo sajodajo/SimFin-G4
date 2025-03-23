@@ -5,6 +5,8 @@ import os
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from datetime import datetime
+import plotly.graph_objects as go
+
 
 class pySimFin:
 
@@ -29,8 +31,16 @@ class pySimFin:
         url = f"{self.base_url}companies/prices/compact?ticker={ticker}&start={start_date}&end={end_date}"
         response = requests.get(url, headers=self.headers).json()
 
-        df_prices = pd.DataFrame(response[0]['data'], columns=response[0]['columns']).drop(columns=['Dividend Paid'])
-        return df_prices
+        if response and len(response) > 0:
+            df_prices = pd.DataFrame(response[0]['data'], columns=response[0]['columns']).drop(columns=['Dividend Paid'])
+            df_prices['Date'] = pd.to_datetime(df_prices['Date'])
+            df_prices.set_index('Date', inplace=True)
+            df_prices.index = pd.to_datetime(df_prices.index)
+            return df_prices
+        else:
+            print("No data received for the stock price.")
+            df_prices = pd.DataFrame() 
+            return df_prices
     
     def getCompanyList(self):
         url = f"{self.base_url}companies/list"
@@ -45,7 +55,6 @@ class pySimFin:
     def plotFinancialIndex(self, ticker, startDate, endDate):
         pricesDF = self.getStockPrices(ticker, startDate, endDate)
         
-        # Ensure 'Date' column is in datetime format
         pricesDF['Date'] = pd.to_datetime(pricesDF['Date'])
         
         plt.figure(figsize=(10, 6))
@@ -53,45 +62,81 @@ class pySimFin:
         
         plt.title(f'{ticker} Stock Price from {startDate} to {endDate}', fontsize=14)
         
-        # Set x-axis locator for quarters and formatter for the date
         plt.gca().xaxis.set_major_locator(mdates.MonthLocator(bymonthday=1, interval=3)) 
         plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m')) 
-    
     
         plt.xlabel('Date', fontsize=12)
         plt.ylabel('Stock Price (USD)', fontsize=12)
         plt.grid(True)
         plt.legend()
         
-        # Rotate the x-ticks to prevent overlap
         plt.xticks(rotation=45)
-        
-        # Adjust layout for better spacing
+
         plt.tight_layout()
         plt.show()
 
-def plotMultipleStocks(self,selected_stocks, startDate, endDate):
-    plt.figure(figsize=(10, 6))
+    def selectMultipleStocks(self,selected_stocks, startDate, endDate):
+        selectedStocks = {}
 
-    for ticker in selected_stocks:
-        stock_data = self.getStockPrices(ticker, startDate, endDate)
-        stock_data['Date'] = pd.to_datetime(stock_data['Date'], errors='coerce') 
-        stock_data = stock_data.dropna(subset=['Date'])
-        plt.plot(stock_data['Date'], stock_data['Last Closing Price'], label=ticker)
+        for ticker in selected_stocks:
+            stockData = self.getStockPrices(ticker, startDate, endDate)
+            StockDataPrice = stockData['Last Closing Price']
+            
+            selectedStocks[ticker] = StockDataPrice
 
-    startDate = datetime.strptime(startDate, '%Y-%m-%d') 
-    endDate = datetime.strptime(endDate, '%Y-%m-%d') 
-
-    plt.title(f"Selected Stock Prices from {startDate.strftime('%B %Y')} to {endDate.strftime('%B %Y')}", fontsize=14)
-    plt.xlabel('Date', fontsize=12)
-    plt.ylabel('Stock Price (USD)', fontsize=12)
-    plt.legend() 
-    plt.grid(True)
+        return pd.DataFrame(selectedStocks)
     
-    plt.gca().xaxis.set_major_locator(mdates.MonthLocator(interval=3))  
-    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%B %Y')) 
-
-    plt.xticks(rotation=45)
     
-    plt.tight_layout()
-    plt.show()
+    def plotMultipleStocks(self,df):
+        fig = plt.figure(figsize=(10, 6))
+
+        for column in df.columns:
+            plt.plot(df.index, df[column], label=column)
+
+        plt.title('Selected Stock Prices Over Time', fontsize=14)
+        plt.xlabel('Date', fontsize=12)
+        plt.ylabel('Price (USD)', fontsize=12)
+        plt.legend()
+        plt.grid(True)
+
+        plt.xticks(rotation=45)
+        plt.tight_layout()
+        plt.show()
+
+        return fig
+    
+
+    def plotlyMultipleStocks(self, df):
+        # Create a Plotly figure
+        fig = go.Figure()
+
+        # Add traces for each column in the DataFrame
+        for column in df.columns:
+            fig.add_trace(go.Scatter(x=df.index, y=df[column], mode='lines', name=column))
+
+        # Customize the layout
+        fig.update_layout(
+            xaxis_title='Date',
+            yaxis_title='Price (USD)',
+            xaxis_tickangle=-45,  # Rotate x-axis labels
+            template='plotly',  # Use a clean, default plotly template
+            showlegend=True,  # Show legend
+            legend=dict(
+                font=dict(size=24, color='white'),  # Customize the font size and color of the legend
+                bgcolor='black',  # Background color of the legend
+                bordercolor='black',  # Border color
+                borderwidth=2  # Border width of the legend
+            ),
+            height=800
+        )
+
+        # Display the plot in Streamlit
+        return fig
+
+    def tickerFind(self,nameList,companyDF):
+        tickerList = []
+        for name in nameList:
+            for index, company in companyDF.iterrows():
+                if name == company['name']:
+                    tickerList.append(company['ticker'])
+        return tickerList
