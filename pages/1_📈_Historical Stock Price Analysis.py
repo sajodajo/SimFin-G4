@@ -12,12 +12,12 @@ st.set_page_config(
     layout = 'wide'
 )
 
+st.title('Stock Price Analysis')
+
 psf = pySimFin()
 
 companyDF = psf.getCompanyList()
 
-## DATE SELECTOR ##
-st.sidebar.title("Filter")
 
 minDate = datetime.date.today() - datetime.timedelta(days=1800)
 maxDate = datetime.date.today() - datetime.timedelta(days=1)
