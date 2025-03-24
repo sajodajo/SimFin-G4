@@ -437,6 +437,16 @@ def compare_forecasting_models_from_df(df, test_size=0.2, feature_cols=None, tar
     from xgboost import XGBRegressor
     from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
+    df = df.rename(columns={
+    'Opening Price': 'Open',
+    'Highest Price': 'High',
+    'Lowest Price': 'Low',
+    'Last Closing Price': 'Close',
+    'Trading Volume': 'Volume'
+})
+    df['Next_Close'] = df['Close'].shift(-1)
+
+    df = df.dropna()
     # Set default feature and target columns if not provided
     if feature_cols is None:
         feature_cols = ['Open', 'High', 'Low', 'Close', 'Volume']
