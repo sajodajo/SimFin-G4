@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from log_function import PySimFin
+from Logging.log_function import PySimFin
 
 API_KEY = "test-api-key"
 
