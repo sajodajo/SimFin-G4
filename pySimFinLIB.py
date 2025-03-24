@@ -339,3 +339,75 @@ def run_forecasts_and_plot(pricesDF):
     df_new.loc[test.index, 'Static_Forecast'] = static_forecast
 
     return df_new
+
+def run_one_step_forecast_new_df(pricesDF):
+    """
+    Creates a new DataFrame from the original pricesDF, prepares the data,
+    trains a linear regression model to predict the next day's closing price,
+    and adds the predicted value to the DataFrame.
+    
+    Parameters:
+      pricesDF: pandas DataFrame with columns:
+         - 'Last Closing Price'
+         - 'Opening Price'
+         - 'Highest Price'
+         - 'Lowest Price'
+         - 'Trading Volume'
+         (and optionally an index or a Date column)
+    
+    Returns:
+      df_new: New DataFrame with columns renamed, a 'Next_Close' target column,
+              and the predicted next day's close stored in 'Predicted_Next_Close'
+      model: The trained Linear Regression model
+    """
+    import pandas as pd
+    from sklearn.linear_model import LinearRegression
+
+    # Create a new DataFrame to avoid modifying the original
+    df_new = pricesDF.copy()
+    
+    # Reset index if necessary (assuming the index is not needed)
+    df_new = df_new.reset_index(drop=True)
+    
+    # Rename columns for consistency
+    df_new.rename(columns={
+        'Last Closing Price': 'Close',
+        'Opening Price': 'Open',
+        'Highest Price': 'High',
+        'Lowest Price': 'Low',
+        'Trading Volume': 'Volume'
+    }, inplace=True)
+    
+    # Create the target column by shifting 'Close' upward (next day's close)
+    df_new['Next_Close'] = df_new['Close'].shift(-1)
+    
+    # Drop the last row, which now has a missing target value
+    df_new = df_new.dropna()
+    
+    # Define the feature columns and target column
+    feature_cols = ['Open', 'High', 'Low', 'Close', 'Volume']
+    target_col = 'Next_Close'
+    
+    # Use all rows except the last one for training
+    train_df = df_new.iloc[:-1]
+    X_train = train_df[feature_cols]
+    y_train = train_df[target_col]
+    
+    # Use the last row as the input for prediction
+    latest_data = df_new.iloc[[-1]][feature_cols]
+    
+    # Initialize and train the Linear Regression model
+    model = LinearRegression()
+    model.fit(X_train, y_train)
+    
+    # Predict the next day's closing price using the latest data
+    next_day_prediction = model.predict(latest_data)[0]
+    
+    # Add the prediction to the new DataFrame (in the last row)
+    df_new.loc[df_new.index[-1], 'Predicted_Next_Close'] = next_day_prediction
+    
+    return df_new, model
+
+# Example usage:
+# new_df, trained_model = run_one_step_forecast_new_df(pricesDF)
+# new_df.tail()  # This will show the last few rows including the 'Predicted_Next_Close'
