@@ -110,16 +110,26 @@ class pySimFin:
         return tickerList
     
     def load_income_data(self, dataset: str='income', variant: str='annual', market: str='us') -> pd.DataFrame:
-        """
-        Loads data from the SimFin API using the SimFin Python library.
 
-        Parameters:
-        - dataset: The dataset type ('income', 'balance', 'cashflow', etc.). Default is 'income'.
-        - variant: Data variant ('annual' or 'quarterly'). Default is 'annual'.
-        - market: Market region (e.g., 'us'). Default is 'us'.
-
-        Returns:
-        - df: Pandas DataFrame containing the requested SimFin dataset.
-        """
         df = sf.load(dataset=dataset, variant=variant, market=market)
         return df
+    
+
+    def getStatementsData(self,ticker,type,startDate,endDate):
+        url = self.base_url + f"companies/statements/compact?ticker={ticker}&statements={type}&period=&start={startDate}&end={endDate}"
+
+        headers = self.headers
+
+        response = requests.get(url, headers=headers)
+
+        print(response.text)
+
+    def statements(self,ticker,type,startDate,endDate):
+        url = self.base_url + f"companies/statements/compact?ticker={ticker}&statements={type}&period=&start={startDate}&end={endDate}"
+
+        response = requests.get(url, headers=self.headers).json()
+
+        columns = response[0]['statements'][0]['columns']
+        data = response[0]['statements'][0]['data']
+
+        return pd.DataFrame(data,columns=columns)
