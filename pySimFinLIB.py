@@ -133,3 +133,84 @@ class pySimFin:
         data = response[0]['statements'][0]['data']
 
         return pd.DataFrame(data,columns=columns)
+    
+def train_linear_model(pricesDF, test_size=0.2):
+    """
+    Train and evaluate a linear regression model to predict the next day's Close.
+
+    :param pricesDF: DataFrame containing columns:
+        - 'Date'
+        - 'Last Closing Price'
+        - 'Opening Price'
+        - 'Highest Price'
+        - 'Lowest Price'
+        - 'Trading Volume'
+    :param test_size: float, fraction of data for testing (default 0.2)
+    :return: (model, mae, mse, r2)
+    """
+
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    from sklearn.model_selection import train_test_split
+    from sklearn.linear_model import LinearRegression
+    from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+
+    # 1. Copy and rename columns
+    df = pricesDF.copy()
+    df = df.reset_index(drop=True)  # or drop=False if you want to keep old index
+    df.rename(columns={
+        'Last Closing Price': 'Close',
+        'Opening Price': 'Open',
+        'Highest Price': 'High',
+        'Lowest Price': 'Low',
+        'Trading Volume': 'Volume'
+    }, inplace=True)
+
+    # 2. Create next day's closing price as target
+    df['Next_Close'] = df['Close'].shift(-1)
+
+    # 3. Drop rows with missing values (last row will be NaN after shift)
+    df.dropna(inplace=True)
+
+    # 4. Convert Date column to datetime if needed
+    if 'Date' in df.columns:
+        df['Date'] = pd.to_datetime(df['Date'])
+
+    # 5. Define features and target
+    X = df[['Open', 'High', 'Low', 'Close', 'Volume']]
+    y = df['Next_Close']
+
+    # 6. Train/test split
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=test_size, shuffle=False  # keep chronological order
+    )
+
+    # 7. Initialize and train model
+    model = LinearRegression()
+    model.fit(X_train, y_train)
+
+    # 8. Make predictions
+    y_pred = model.predict(X_test)
+
+    # 9. Evaluate
+    mae = mean_absolute_error(y_test, y_pred)
+    mse = mean_squared_error(y_test, y_pred)
+    r2 = r2_score(y_test, y_pred)
+
+    print(f"Mean Absolute Error (MAE): {mae:.4f}")
+    print(f"Mean Squared Error (MSE): {mse:.4f}")
+    print(f"R² Score: {r2:.4f}")
+
+    # 10. Plot Actual vs Predicted
+    plt.figure(figsize=(12,6))
+    plt.plot(y_test.values, label='Actual')
+    plt.plot(y_pred, label='Predicted', linestyle='--')
+    plt.title('Actual vs Predicted Close Prices')
+    plt.xlabel('Test Samples')
+    plt.ylabel('Price')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+    # Return the trained model and metrics if you want
+    return model, mae, mse, r2
