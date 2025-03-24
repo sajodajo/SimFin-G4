@@ -411,3 +411,85 @@ def run_one_step_forecast_new_df(pricesDF):
 # Example usage:
 # new_df, trained_model = run_one_step_forecast_new_df(pricesDF)
 # new_df.tail()  # This will show the last few rows including the 'Predicted_Next_Close'
+
+
+def compare_forecasting_models_from_df(df, test_size=0.2, feature_cols=None, target_col=None, plot=True):
+    """
+    Trains and compares forecasting models using a DataFrame that includes the target.
+    
+    Parameters:
+      df          : pandas DataFrame that must contain the target column (default 'Next_Close')
+                    and the feature columns (default ['Open', 'High', 'Low', 'Close', 'Volume']).
+      test_size   : Fraction of data to use as test set (default: 0.2).
+      feature_cols: List of columns to use as features (default: ['Open', 'High', 'Low', 'Close', 'Volume']).
+      target_col  : The name of the target column (default: 'Next_Close').
+      plot        : Boolean; if True, plot predictions vs. actual values (default: True).
+    
+    Returns:
+      results_df : DataFrame containing evaluation metrics (MAE, MSE, R²) for each model.
+      models     : Dictionary of the trained models.
+    """
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    from sklearn.model_selection import train_test_split
+    from sklearn.linear_model import LinearRegression
+    from sklearn.ensemble import RandomForestRegressor
+    from xgboost import XGBRegressor
+    from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+
+    # Set default feature and target columns if not provided
+    if feature_cols is None:
+        feature_cols = ['Open', 'High', 'Low', 'Close', 'Volume']
+    if target_col is None:
+        target_col = 'Next_Close'
+
+    # Define features (X) and target (y)
+    X = df[feature_cols]
+    y = df[target_col]
+
+    # Split the data (keep time order with shuffle=False)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, shuffle=False)
+
+    # Initialize models
+    lr_model = LinearRegression()
+    rf_model = RandomForestRegressor(n_estimators=100, random_state=42)
+    xgb_model = XGBRegressor(n_estimators=100, learning_rate=0.1, random_state=42)
+
+    # Fit models
+    lr_model.fit(X_train, y_train)
+    rf_model.fit(X_train, y_train)
+    xgb_model.fit(X_train, y_train)
+
+    # Create dictionary of models for easy iteration
+    models = {
+        'Linear Regression': lr_model,
+        'Random Forest': rf_model,
+        'XGBoost': xgb_model
+    }
+
+    # Evaluate each model
+    results = {}
+    for name, model in models.items():
+        y_pred = model.predict(X_test)
+        mae = mean_absolute_error(y_test, y_pred)
+        mse = mean_squared_error(y_test, y_pred)
+        r2 = r2_score(y_test, y_pred)
+        results[name] = {'MAE': mae, 'MSE': mse, 'R²': r2}
+
+    results_df = pd.DataFrame(results).T.sort_values(by='MAE')
+
+    # Plot predictions vs. actual if requested
+    if plot:
+        plt.figure(figsize=(12, 6))
+        for name, model in models.items():
+            y_pred = model.predict(X_test)
+            plt.plot(y_pred, label=f'{name} Prediction', alpha=0.7)
+        plt.plot(y_test.values, label='Actual', linewidth=2, linestyle='--', color='black')
+        plt.title('Model Predictions vs. Actual')
+        plt.xlabel('Test Samples')
+        plt.ylabel('Close Price')
+        plt.legend()
+        plt.grid(True)
+        plt.show()
+
+    return results_df, models
