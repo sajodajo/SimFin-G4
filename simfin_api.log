@@ -1,6 +1,0 @@
-2025-03-24 11:06:36,019 [INFO] Initialized PySimFin API wrapper
-2025-03-24 11:06:36,027 [INFO] Fetching share prices for MSFT from 2022-01-01 to 2022-12-31
-2025-03-24 11:06:37,138 [ERROR] Failed to fetch share prices for MSFT: 404 Client Error: Not Found for url: https://www.simfin.com/api/v2/companies/MSFT/shares/prices?start=2022-01-01&end=2022-12-31
-2025-03-24 11:09:37,483 [INFO] Initialized PySimFin API wrapper
-2025-03-24 11:09:37,487 [INFO] Fetching share prices for MSFT from 2022-01-01 to 2022-12-31
-2025-03-24 11:09:38,289 [ERROR] Failed to fetch share prices for MSFT: 404 Client Error: Not Found for url: https://www.simfin.com/api/v2/companies/MSFT/shares/prices?start=2022-01-01&end=2022-12-31
