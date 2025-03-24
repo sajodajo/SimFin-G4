@@ -1,5 +1,7 @@
 import requests
 import pandas as pd
+import simfin as sf
+from simfin.names import *
 
 class PySimFin:
     def __init__(self, api_key: str):
@@ -46,3 +48,18 @@ class PySimFin:
             return pd.DataFrame(data)
         else:
             raise Exception(f"Error fetching financial statements: {response.text}")
+        
+    def load_income_data(self, dataset: str='income', variant: str='annual', market: str='us') -> pd.DataFrame:
+        """
+        Loads data from the SimFin API using the SimFin Python library.
+
+        Parameters:
+        - dataset: The dataset type ('income', 'balance', 'cashflow', etc.). Default is 'income'.
+        - variant: Data variant ('annual' or 'quarterly'). Default is 'annual'.
+        - market: Market region (e.g., 'us'). Default is 'us'.
+
+        Returns:
+        - df: Pandas DataFrame containing the requested SimFin dataset.
+        """
+        df = sf.load(dataset=dataset, variant=variant, market=market)
+        return df

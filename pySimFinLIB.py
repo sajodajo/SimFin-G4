@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from datetime import datetime
 import plotly.graph_objects as go
+import simfin as sf
+from simfin.names import *
 
 
 class pySimFin:
@@ -106,3 +108,18 @@ class pySimFin:
                 if name == company['name']:
                     tickerList.append(company['ticker'])
         return tickerList
+    
+    def load_income_data(self, dataset: str='income', variant: str='annual', market: str='us') -> pd.DataFrame:
+        """
+        Loads data from the SimFin API using the SimFin Python library.
+
+        Parameters:
+        - dataset: The dataset type ('income', 'balance', 'cashflow', etc.). Default is 'income'.
+        - variant: Data variant ('annual' or 'quarterly'). Default is 'annual'.
+        - market: Market region (e.g., 'us'). Default is 'us'.
+
+        Returns:
+        - df: Pandas DataFrame containing the requested SimFin dataset.
+        """
+        df = sf.load(dataset=dataset, variant=variant, market=market)
+        return df
