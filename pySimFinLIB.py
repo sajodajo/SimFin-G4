@@ -214,3 +214,127 @@ def train_linear_model(pricesDF, test_size=0.2):
 
     # Return the trained model and metrics if you want
     return model, mae, mse, r2
+
+def run_forecasts_and_plot_new_df(pricesDF):
+    """
+    Creates a new DataFrame from pricesDF, prepares it, performs rolling one-step and static forecasts,
+    plots the results, and returns the new DataFrame with forecasts.
+    
+    Expects pricesDF to have at least the following columns:
+      - 'Last Closing Price'
+      - 'Opening Price'
+      - 'Highest Price'
+      - 'Lowest Price'
+      - 'Trading Volume'
+      
+    The new DataFrame will have the columns:
+      - 'Close', 'Open', 'High', 'Low', 'Volume', 'Next_Close'
+      - And forecast columns will be added via the plotting functions.
+    """
+    import pandas as pd
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from sklearn.linear_model import LinearRegression
+
+    # Create a new DataFrame from the original to avoid modifying pricesDF
+    df_new = pricesDF.copy()
+    
+    # Reset the index if needed and assume there's a Date column or the index is Date
+    # Here, if the index isn't datetime, we force conversion (you may need to adjust based on your data)
+    if not pd.api.types.is_datetime64_any_dtype(df_new.index):
+        df_new.index = pd.to_datetime(df_new.index)
+    df_new = df_new.sort_index()
+    
+    # Rename columns for consistency
+    df_new = df_new.reset_index(drop=True)
+    df_new.rename(columns={
+        'Last Closing Price': 'Close',
+        'Opening Price': 'Open',
+        'Highest Price': 'High',
+        'Lowest Price': 'Low',
+        'Trading Volume': 'Volume'
+    }, inplace=True)
+    
+    # Create next day's closing price as target column
+    df_new['Next_Close'] = df_new['Close'].shift(-1)
+    df_new.dropna(inplace=True)  # Remove the last row with no target
+    
+    # For demonstration purposes, split the data into training and test segments:
+    # Here we'll take the last 30 rows as test and the rest as training.
+    train = df_new.iloc[:-30]
+    test = df_new.iloc[-30:]
+    train_plot = df_new.iloc[-60:-30]  # The 30 days before test for plotting historical data
+
+    feature_cols = ['Open', 'High', 'Low', 'Close', 'Volume']
+    target_col = 'Next_Close'
+
+    ### 🔁 ROLLING ONE-STEP FORECAST
+    one_step_preds = []
+    ci_lower = []
+    ci_upper = []
+
+    for i in range(len(test)):
+        # Use all available data up to the current test point
+        rolling_train = pd.concat([train, test.iloc[:i]])
+        X_train = rolling_train[feature_cols]
+        y_train = rolling_train[target_col]
+
+        model = LinearRegression()
+        model.fit(X_train, y_train)
+
+        X_input = test.iloc[[i]][feature_cols]
+        pred = model.predict(X_input)[0]
+
+        one_step_preds.append(pred)
+        ci_lower.append(pred * 0.98)  # Mock a 2% lower bound
+        ci_upper.append(pred * 1.02)  # Mock a 2% upper bound
+
+    one_step_forecasts = pd.Series(one_step_preds, index=test.index)
+    ci_lower_series = pd.Series(ci_lower, index=test.index)
+    ci_upper_series = pd.Series(ci_upper, index=test.index)
+
+    ### 🔮 STATIC FORECAST FROM LAST DAY OF TRAINING
+    model_static = LinearRegression()
+    X_train_static = train[feature_cols]
+    y_train_static = train[target_col]
+    model_static.fit(X_train_static, y_train_static)
+
+    X_forecast = test[feature_cols]
+    static_preds = model_static.predict(X_forecast)
+    static_forecast = pd.Series(static_preds, index=test.index)
+
+    static_ci_lower = static_forecast * 0.98
+    static_ci_upper = static_forecast * 1.02
+
+    # 📈 Plotting the forecasts side-by-side
+    fig, axes = plt.subplots(1, 2, figsize=(16, 6))
+
+    # LEFT: Rolling One-Step Forecast
+    axes[0].plot(train_plot.index, train_plot['Close'], label='Historical Data', marker='o')
+    axes[0].plot(test.index, test[target_col], label='Actual', color='black', marker='o')
+    axes[0].plot(one_step_forecasts.index, one_step_forecasts, label='One-step Forecast', color='red', marker='o')
+    axes[0].fill_between(test.index, ci_lower_series, ci_upper_series, color='red', alpha=0.3)
+    axes[0].set_title("Rolling One-Step Ahead Forecast")
+    axes[0].set_xlabel("Date")
+    axes[0].set_ylabel("Price")
+    axes[0].legend()
+
+    # RIGHT: Static Forecast from End of Training
+    axes[1].plot(train_plot.index, train_plot['Close'], label='Historical Data', marker='o')
+    axes[1].plot(test.index, test[target_col], label='Actual', color='black', marker='o')
+    axes[1].plot(static_forecast.index, static_forecast, label='Static Forecast', color='green', marker='o')
+    axes[1].fill_between(test.index, static_ci_lower, static_ci_upper, color='green', alpha=0.3)
+    axes[1].set_title("Static Forecast from End of Training")
+    axes[1].set_xlabel("Date")
+    axes[1].set_ylabel("Price")
+    axes[1].legend()
+
+    plt.tight_layout()
+    plt.show()
+
+    # Optionally, you can add the forecast results as new columns to df_new
+    # For example, for the rolling forecast, align predictions to the test index
+    df_new.loc[test.index, 'One_Step_Forecast'] = one_step_forecasts
+    df_new.loc[test.index, 'Static_Forecast'] = static_forecast
+
+    return df_new
