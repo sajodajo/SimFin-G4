@@ -215,7 +215,8 @@ def train_linear_model(pricesDF, test_size=0.2):
     # Return the trained model and metrics if you want
     return model, mae, mse, r2
 
-def run_forecasts_and_plot_new_df(pricesDF):
+
+def run_forecasts_and_plot(pricesDF):
     """
     Creates a new DataFrame from pricesDF, prepares it, performs rolling one-step and static forecasts,
     plots the results, and returns the new DataFrame with forecasts.
