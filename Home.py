@@ -19,7 +19,13 @@ with col2:
     st.image("Media/flexiTrade.png", width=800)
 
 
-import streamlit as st
+st.markdown("""
+    <style>
+        html, body, [class*="css"]  {
+            font-family: 'Helvetica', sans-serif;
+        }
+    </style>
+    """, unsafe_allow_html=True)
 
 # Custom CSS styling
 st.markdown("""
