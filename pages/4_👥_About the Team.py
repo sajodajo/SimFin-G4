@@ -6,6 +6,16 @@ st.set_page_config(
     layout = 'wide'
 )
 
+
+st.markdown("""
+    <style>
+        html, body, [class*="css"]  {
+            font-family: 'Segoe UI', sans-serif;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+
 st.title(f'The FlexiTrade Team\n\n')
 
 

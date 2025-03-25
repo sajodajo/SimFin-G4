@@ -37,6 +37,16 @@ with col2:
 
 tickerList = psf.tickerFind(selected_stocks,companyDF)  
 
+
+st.markdown("""
+    <style>
+        html, body, [class*="css"]  {
+            font-family: 'Segoe UI', sans-serif;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+
 try:
     
     st.markdown(f"""

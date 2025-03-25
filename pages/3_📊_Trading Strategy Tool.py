@@ -7,3 +7,12 @@ st.set_page_config(
 )
 
 st.title('Trading Strategy Tool')
+
+
+st.markdown("""
+    <style>
+        html, body, [class*="css"]  {
+            font-family: 'Segoe UI', sans-serif;
+        }
+    </style>
+    """, unsafe_allow_html=True)

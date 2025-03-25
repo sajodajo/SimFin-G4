@@ -29,6 +29,15 @@ st.markdown(
 )
 
 
+st.markdown("""
+    <style>
+        html, body, [class*="css"]  {
+            font-family: 'Segoe UI', sans-serif;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+
 st.title('Historical Price & Risk Analysis')
 
 psf = pySimFin()
