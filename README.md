@@ -1,8 +1,4 @@
-Got it! Since this is a multi-page app with multiple Python files (likely using Streamlit or a similar framework), here’s a more complete and structured README.md tailored for a multi-page app setup.
-
-⸻
-
-📈 Financial Analytics App
+📈 Flexitrade - Financial Analytics App
 
 An interactive multi-page web application for analyzing, predicting, and managing stock market data. Built for traders, analysts, and finance enthusiasts who want to explore and act on market insights with ease.
 
