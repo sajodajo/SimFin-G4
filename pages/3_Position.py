@@ -38,7 +38,7 @@ except:
 col1, spacer1, col2, spacer2, col3 = st.columns([3, 0.3, 3, 0.3, 3])
 
 with col1:
-    st.write("#### Cash Available ($)")
+    st.write("#### Available Capital ($)")
     cash_available = st.slider(
         "", 
         min_value=0, 
@@ -48,7 +48,7 @@ with col1:
     )
 
 with col2:
-    st.write("#### Desired Risk Level (%)")
+    st.write("####  Risk Appetite (%)")
     risk_percent = st.slider(
         "", 
         min_value=0, 
@@ -59,7 +59,7 @@ with col2:
     risk_level = risk_percent / 100
 
 with col3:
-    st.write("#### Stocks to Include")
+    st.write("#### Selected Portfolio Stocks")
     selected_stocks = st.multiselect('', companyDF['name'].sort_values())
 
     tickerList = psf.tickerFind(selected_stocks,companyDF)  
@@ -85,7 +85,7 @@ except:
 
 for idx, ticker in enumerate(tickerList):
     with cols[idx]:
-        st.write(f"##### How much {ticker} stock do you currently hold (in USD)?")
+        st.write(f"##### How much {ticker} stock do you currently hold ($)?")
 
         shares = st.text_input("", key=f"holdings_{ticker}")
         try:
@@ -117,7 +117,10 @@ for idx, ticker in enumerate(tickerList):
 
             todayPricesDict[ticker] = todayPrice
 
-    results = pd.DataFrame(psf.generate_trade_signals(predictions, current_holdings, cash_available, todayPricesDict, risk_level))
+    try:
+        results = pd.DataFrame(psf.generate_trade_signals(predictions, current_holdings, cash_available, todayPricesDict, risk_level))
+    except:
+        pass
 
 
 

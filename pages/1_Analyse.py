@@ -151,7 +151,6 @@ for idx, ticker in enumerate(tickerList):
         confidence_index = np.argmin(np.abs(confidence_levels - target_level))
 
         st.subheader(f"{ticker} Risk Summary")
-        st.markdown(f"- **Based on Past Data:** You could lose up to <span style='color:red; font-weight:bold;'>{abs(VaR_hist[confidence_index]/100):.2%}</span> on a very bad day.", unsafe_allow_html=True)
         st.markdown(f"- **Assuming Typical Market Behavior:** Losses might reach <span style='color:red; font-weight:bold;'>{abs(VaR_norm[confidence_index]/100):.2%}</span>.", unsafe_allow_html=True)
         st.markdown(f"- **Including Rare Crashes:** Extreme events could lead to losses up to <span style='color:red; font-weight:bold;'>{abs(VaR_t[confidence_index]/100):.2%}</span>.", unsafe_allow_html=True)
 
