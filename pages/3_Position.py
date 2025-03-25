@@ -35,8 +35,6 @@ except:
     st.rerun()
 
 
-
-
 col1, spacer1, col2, spacer2, col3 = st.columns([3, 0.3, 3, 0.3, 3])
 
 with col1:
@@ -74,7 +72,11 @@ predictions = {}
 current_holdings = {}
 
 if len(tickerList) > 0:
-    st.write('### Current Holdings')
+    st.markdown('''
+    <h3 style="color: #0393D0; margin-top: 20px;">
+        Current Holdings
+    </h3>
+    ''', unsafe_allow_html=True)
 
 try:
     cols = st.columns(len(tickerList))
@@ -83,7 +85,7 @@ except:
 
 for idx, ticker in enumerate(tickerList):
     with cols[idx]:
-        st.write(f"##### How much {ticker} stock do you currently hold?")
+        st.write(f"##### How much {ticker} stock do you currently hold (in USD)?")
 
         shares = st.text_input("", key=f"holdings_{ticker}")
         try:
@@ -115,8 +117,45 @@ for idx, ticker in enumerate(tickerList):
 
             todayPricesDict[ticker] = todayPrice
 
-try:
-    signals = psf.generate_trade_signals(predictions, current_holdings, cash_available, todayPricesDict, risk_level)
-    st.dataframe(signals)
-except:
-    pass
+    results = pd.DataFrame(psf.generate_trade_signals(predictions, current_holdings, cash_available, todayPricesDict, risk_level))
+
+
+
+if len(tickerList) > 0:
+    st.markdown('''
+    <h3 style="color: #0393D0; margin-top: 20px;">
+        Recommendations
+    </h3>
+    ''', unsafe_allow_html=True)
+
+    # Create one column per ticker
+    cols = st.columns(len(tickerList))
+
+    for i, col in enumerate(tickerList):
+        if shares != '':
+            action = results.loc['action', col]
+            shares = results.loc['shares', col]
+            price = todayPricesDict[col]
+
+            with cols[i]:
+                st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
+
+                logo_url = psf.getLogo(col)
+                st.empty().markdown(f"""
+                    <div style="text-align: center;">
+                        <img src="{logo_url}" style="max-height: 50px;" />
+                    </div>
+                """, unsafe_allow_html=True)
+
+                st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
+
+                st.markdown(f'''
+                    <div style="border: 1px solid #ddd; padding: 10px; border-radius: 10px; text-align: center;">
+                        <h4 style="color: #333;">{col}</h4>
+                        <p><strong>Action:</strong> {action}</p>
+                        <p><strong>Shares:</strong> {shares}</p>
+                        <p><strong>Price:</strong> ${price:.2f}</p>
+                    </div>
+                ''', unsafe_allow_html=True)
+
+

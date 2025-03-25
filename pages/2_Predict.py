@@ -50,13 +50,13 @@ st.markdown("""
 
 
 try:
-    
+    columns = st.columns(len(tickerList))
     st.markdown(f"""
         <div style='text-align: center;'>
             <h1>Next Day Price Predictions<br></span></h2>
         </div>
     """, unsafe_allow_html=True)
-    columns = st.columns(len(tickerList))
+
 
 except:
     pass
