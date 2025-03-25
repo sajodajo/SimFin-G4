@@ -8,3 +8,4 @@ matplotlib
 plotly
 simfin
 xgboost
+seaborn
