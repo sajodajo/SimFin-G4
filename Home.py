@@ -22,7 +22,7 @@ with col2:
 st.markdown("""
     <style>
         html, body, [class*="css"]  {
-            font-family: 'Helvetica', sans-serif;
+            font-family: 'Segoe UI', sans-serif;
         }
     </style>
     """, unsafe_allow_html=True)
