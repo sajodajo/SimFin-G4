@@ -105,7 +105,7 @@ class pySimFin:
                 bordercolor='white',  # Border color
                 borderwidth=2  # Border width of the legend
             ),
-            height=400
+            height=600
         )
 
         # Display the plot in Streamlit
