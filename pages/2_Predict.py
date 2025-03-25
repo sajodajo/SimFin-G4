@@ -12,12 +12,14 @@ from io import BytesIO
 
 
 st.set_page_config(
-    page_title="Price Prediction Tool",
+    page_title="FlexiTradePredict",
     page_icon='Media/flexiTradeIcon.png',
     layout = 'wide'
 )
 
-st.title('Price Prediction Tool')
+col1, col2, col3 = st.columns([1,2,1])
+with col2:
+    st.image("Media/ftPredict.png", width=800)
 
 psf = pySimFin()
 
@@ -58,7 +60,6 @@ try:
 
 except:
     pass
-
 
 pricesDFs = {}
 bestModels = {}

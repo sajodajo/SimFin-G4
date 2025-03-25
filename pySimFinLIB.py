@@ -53,24 +53,6 @@ class pySimFin:
             df_prices = pd.DataFrame() 
             return df_prices
         
-    def calcColumns(self,df):
-        df['Date'] = pd.to_datetime(df['Date'])
-        df.set_index('Date', inplace=True)
-
-        df.drop(columns='Dividend Paid', inplace=True)
-
-        df['Log_Return'] = (np.log(df['Opening Price'] / df['Opening Price'].shift(1))*100)
-        df.dropna(inplace=True)
-
-        df['Abs_Log_Return'] = np.abs(df['Log_Return'])
-
-        df['Rolling_Std'] = df['Log_Return'].rolling(window=60).std()
-
-        lowess = sm.nonparametric.lowess
-        global smoothed_abs
-        smoothed_abs = lowess(df['Abs_Log_Return'], df.index, frac=0.03)  # frac=0.03 controls smoothness
-
-        return df
     
     def getCompanyList(self):
         url = f"{self.base_url}companies/list"
@@ -252,6 +234,32 @@ class pySimFin:
         response = requests.get(api_url, headers={'X-Api-Key': 'TOPXVVT0OqevUxpYwXiMPA==d6gb3gYVVrMK6Pne'})
         if response.status_code == requests.codes.ok:
             return response.json()[0]['image']
+        
+    def generate_trade_signals(self,predictions, current_holdings, cash_available, prices, risk_level):
+        decisions = {}
+        max_invest_per_stock = risk_level * cash_available / len(predictions)
+        
+        for stock, prediction in predictions.items():
+            price = prices[stock]
+            if prediction == "UP":
+                budget = max_invest_per_stock
+                shares_to_buy = int(budget / price)
+                if shares_to_buy > 0:
+                    decisions[stock] = {"action": "BUY", "shares": shares_to_buy}
+                else:
+                    decisions[stock] = {"action": "HOLD"}
+            
+            elif prediction == "DOWN":
+                if current_holdings.get(stock, 0) > 0:
+                    shares_to_sell = int(current_holdings[stock] * risk_level)
+                    decisions[stock] = {"action": "SELL", "shares": shares_to_sell}
+                else:
+                    decisions[stock] = {"action": "HOLD"}
+            
+            else:
+                decisions[stock] = {"action": "HOLD"}
+        
+        return decisions
         
     
 

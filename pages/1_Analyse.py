@@ -9,10 +9,14 @@ import modellingLIB
 
 
 st.set_page_config(
-    page_title="Stock Price Analysis",
+    page_title="FlexiTradeAnalyse",
     page_icon='Media/flexiTradeIcon.png',
     layout = 'wide'
 )
+
+col1, col2, col3 = st.columns([1,2,1])
+with col2:
+    st.image("Media/ftAnalyse.png", width=800)
 
 st.markdown(
     """
@@ -37,8 +41,6 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-
-st.title('Historical Price & Risk Analysis')
 
 psf = pySimFin()
 
