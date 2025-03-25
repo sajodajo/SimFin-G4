@@ -4,3 +4,4 @@ plotly
 dotenv
 matplotlib
 simfin
+sklearn
