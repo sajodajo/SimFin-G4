@@ -143,12 +143,20 @@ if len(tickerList) > 0:
             with cols[i]:
                 st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
 
-                logo_url = psf.getLogo(col)
-                st.empty().markdown(f"""
-                    <div style="text-align: center;">
-                        <img src="{logo_url}" style="max-height: 50px;" />
-                    </div>
-                """, unsafe_allow_html=True)
+                try:
+                    logo_url = psf.getLogo(ticker)
+                    st.empty().markdown(f"""
+                        <div style="text-align: center;">
+                            <img src="{logo_url}" style="max-height: 50px;" />
+                        </div>
+                    """, unsafe_allow_html=True)
+                except: 
+                    logo_url = 'https://drive.google.com/file/d/1lR3jAKMkjE5tlRwKRHZsd2le0f_uAwOq/'
+                    st.empty().markdown(f"""
+                        <div style="text-align: center;">
+                            <img src="{logo_url}" style="max-height: 50px;" />
+                        </div>
+                    """, unsafe_allow_html=True)
 
                 st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
 
