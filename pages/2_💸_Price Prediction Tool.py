@@ -13,11 +13,9 @@ from io import BytesIO
 
 st.set_page_config(
     page_title="Price Prediction Tool",
-    page_icon="💸",
+    page_icon='Media/flexiTradeIcon.png',
     layout = 'wide'
 )
-
-
 
 st.title('Price Prediction Tool')
 
@@ -26,70 +24,84 @@ psf = pySimFin()
 companyDF = psf.getCompanyList()
 
 col1, col2 = st.columns(2)
+with col1:
+    st.markdown(f"""
+        <div style='text-align: center;'>
+            <h3 style='margin-bottom: 0rem;'><br>Choose up to 5 companies to analyse:</h3>
+        </div>
+    """, unsafe_allow_html=True)
 
-## STOCK SELECTOR ##
-selected_stocks = st.multiselect('Select up to 5 stocks to visualise:', companyDF['name'].sort_values())
+with col2:
+    ## STOCK SELECTOR ##
+    selected_stocks = st.multiselect('', companyDF['name'].sort_values())
 
 tickerList = psf.tickerFind(selected_stocks,companyDF)  
 
-st.markdown(f"""
-    <div style='text-align: center;'>
-        <h2>Next Day Price Predictions</span></h2>
-    </div>
-""", unsafe_allow_html=True)
+try:
+    
+    st.markdown(f"""
+        <div style='text-align: center;'>
+            <h1>Next Day Price Predictions<br></span></h2>
+        </div>
+    """, unsafe_allow_html=True)
+    columns = st.columns(len(tickerList))
 
-columns = st.columns(len(tickerList))
+except:
+    pass
 
 
 pricesDFs = {}
+bestModels = {}
 
 for idx, ticker in enumerate(tickerList):
     today = datetime.today().date()
-    pricesDF = psf.getStockPrices(ticker, '2020-01-01', today)
-    
 
-   # mse, r2, rmse, percentage_rmse, nextDay, df, latest_data, next_day_prediction = psf.linearRegression(pricesDF)
-    mse, r2, rmse, percentage_rmse, df  = psf.linearRegression(pricesDF)
+    pricesDF = psf.getStockPrices(ticker, '2020-01-01', today)
+    pricesDFs[ticker] = pricesDF  
+
+    compareModels = psf.multiModelTest(pricesDFs.get(ticker))
+    bestModels[ticker] = compareModels.index[0]
+
+    mse, r2, rmse, percentage_rmse, df  = psf.runBestModel(pricesDF,bestModels[ticker])
 
     nextDayPrice = df.iloc[-1, -1]
     todayPrice = df.iloc[-2, -1]
     delta = nextDayPrice - todayPrice
 
-    pricesDFs[ticker] = pricesDF
+
  
     with columns[idx]:
+        try:
+            logo_url = psf.getLogo(ticker)
+            st.empty().markdown(f"""
+                <div style="text-align: center;">
+                    <img src="{logo_url}" style="max-height: 50px;" />
+                </div>
+            """, unsafe_allow_html=True)
+        except: 
+            logo_url = 'https://drive.google.com/file/d/1lR3jAKMkjE5tlRwKRHZsd2le0f_uAwOq/'
+            st.empty().markdown(f"""
+                <div style="text-align: center;">
+                    <img src="{logo_url}" style="max-height: 50px;" />
+                </div>
+            """, unsafe_allow_html=True)
 
-        logo_url = psf.getLogo(ticker)
-        response = requests.get(logo_url)
-        image = Image.open(BytesIO(response.content))
-        max_height = 50
-        original_width, original_height = image.size
-        aspect_ratio = original_width / original_height
-        new_width = int(max_height * aspect_ratio)
-        image = image.resize((new_width, max_height))
-        col1, col2, col3 = st.columns([1, 4, 1])
-        with col2:
-            st.image(image)
-
-
-
-        if delta > 0:
-            
+        if delta > 0:          
             st.markdown(f"""
                 <div style='text-align: center;'>
-                    <h2> {ticker} \n\n  <span style='color: green;'>${round(nextDayPrice, 2)}</span></h2>
+                    <h2><span style='color: grey;'>{ticker} <br><span style='color: black;'>${round(nextDayPrice, 2)}<br><span style='color: green;'>+${round(delta, 2)}</span></h2>
                 </div>
             """, unsafe_allow_html=True)
         elif delta < 0:
             st.markdown(f"""
                 <div style='text-align: center;'>
-                    <h2> {ticker} \n\n  <span style='color: red;'>${round(nextDayPrice, 2)}</span></h2>
+                    <h2><span style='color: grey;'>{ticker} <br><span style='color: black;'>${round(nextDayPrice, 2)}<br><span style='color: red;'>-${abs(round(delta, 2))}</span></h2>
                 </div>
             """, unsafe_allow_html=True)
         else:
             st.markdown(f"""
                 <div style='text-align: center;'>
-                    <h2> {ticker} \n\n  <span style='color: grey;'>${round(nextDayPrice, 2)}</span></h2>
+                    <h2><span style='color: grey;'>{ticker}<br><span style='color: black;'>${round(nextDayPrice, 2)}<br><span style='color: grey;'>+${round(delta, 2)}</span></h2>
                 </div>
             """, unsafe_allow_html=True)
 
@@ -106,6 +118,6 @@ with st.expander("Under the Hood 🔧"):
             st.dataframe(compareModels)
         with col2:
             st.markdown("<h4 style='text-align: center;'>Prices - Last 3 Days</h4>", unsafe_allow_html=True)
-            mse, r2, rmse, percentage_rmse, df  = psf.linearRegression(pricesDFs.get(ticker))
+            mse, r2, rmse, percentage_rmse, df  = psf.runBestModel(pricesDFs.get(ticker),bestModels[ticker])
             st.dataframe(df.tail(3))
         st.markdown("<hr style='border: 1px solid #000;'>", unsafe_allow_html=True)

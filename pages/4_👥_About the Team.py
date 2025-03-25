@@ -2,21 +2,20 @@ import streamlit as st
 
 st.set_page_config(
     page_title="About the Team",
-    page_icon="👥",
+    page_icon='Media/flexiTradeIcon.png',
     layout = 'wide'
 )
 
-st.title(f'💫 About the Team\n\n')
+st.title(f'The FlexiTrade Team\n\n')
 
 
-import streamlit as st
+st.markdown("""
+<div style="text-align: center; font-size: 18px; line-height: 1.6; max-width: 1350px; margin: 0 auto;">
+<p><strong>FlexiTrade</strong> is an automated daily trading tool designed and built by a small, focused team of engineers, data scientists, and market enthusiasts. We come from diverse professional backgrounds — spanning finance, machine learning, and software development — but share a common goal: to simplify and strengthen the way automated trading is done.</p>
 
-
-
-
-st.write('''At Stock Insights Hub, we are proud to be a dynamic, global team bringing a wealth of knowledge and expertise from across the world. Our diverse backgrounds and experiences empower us to innovate and provide unique solutions for stock market analysis, prediction, and strategy optimization. Together, we strive to create cutting-edge tools that enable our users to succeed in the fast-paced world of finance.
-
-Our team consists of experts from a wide range of disciplines, from finance and machine learning to software development and strategy. Each member contributes their own perspective, allowing us to tackle challenges from multiple angles and continuously improve our platform.''')
+<p>What sets our team apart is a hands-on approach. We’re not just building tools — we’re actively testing strategies, fine-tuning models, and iterating on systems to ensure they hold up in real-world conditions. Every feature in FlexiTrade is the result of direct collaboration across disciplines, combining technical rigor with practical trading insight.<br><br></p>
+</div>
+""", unsafe_allow_html=True)
 
 
 # Create 5 columns
@@ -44,7 +43,7 @@ with col3:
 # Column 4
 with col4:
     st.image('https://media.licdn.com/dms/image/v2/D4E03AQHXn-PMAQP0IQ/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1695490854107?e=1748476800&v=beta&t=eBbigPp61ssoLheKLO7YlPliMAywKRzxSSFty98y_os', use_container_width=True)
-    st.subheader('Waldo Barreto Tascon')
+    st.subheader('Waldo Barreto')
     st.write('WB Description')
 
 # Column 5

@@ -14,6 +14,9 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 import numpy as np
 from sklearn.ensemble import RandomForestRegressor
 from xgboost import XGBRegressor
+import xgboost as xgb
+import statsmodels.api as sm
+
 
 
 class pySimFin:
@@ -49,6 +52,25 @@ class pySimFin:
             print("No data received for the stock price.")
             df_prices = pd.DataFrame() 
             return df_prices
+        
+    def calcColumns(self,df):
+        df['Date'] = pd.to_datetime(df['Date'])
+        df.set_index('Date', inplace=True)
+
+        df.drop(columns='Dividend Paid', inplace=True)
+
+        df['Log_Return'] = (np.log(df['Opening Price'] / df['Opening Price'].shift(1))*100)
+        df.dropna(inplace=True)
+
+        df['Abs_Log_Return'] = np.abs(df['Log_Return'])
+
+        df['Rolling_Std'] = df['Log_Return'].rolling(window=60).std()
+
+        lowess = sm.nonparametric.lowess
+        global smoothed_abs
+        smoothed_abs = lowess(df['Abs_Log_Return'], df.index, frac=0.03)  # frac=0.03 controls smoothness
+
+        return df
     
     def getCompanyList(self):
         url = f"{self.base_url}companies/list"
@@ -96,9 +118,9 @@ class pySimFin:
             template='plotly',  # Use a clean, default plotly template
             showlegend=True,  # Show legend
             legend=dict(
-                font=dict(size=24, color='white'),  # Customize the font size and color of the legend
-                bgcolor='black',  # Background color of the legend
-                bordercolor='black',  # Border color
+                font=dict(size=24, color='black'),  # Customize the font size and color of the legend
+                bgcolor='white',  # Background color of the legend
+                bordercolor='white',  # Border color
                 borderwidth=2  # Border width of the legend
             ),
             height=400
@@ -125,43 +147,7 @@ class pySimFin:
         data = response[0]['statements'][0]['data']
 
         return pd.DataFrame(data,columns=columns)
-    
-    def linearRegression(self,df):
-        df['Rolling Mean Closing Price'] = df['Last Closing Price'].rolling(window=30).mean()
-        df['Next Day Closing Price'] = df['Last Closing Price'].shift(-1)
 
-        df = df.dropna()
-        
-        X = df[['Common Shares Outstanding', 'Last Closing Price', 'Adjusted Closing Price', 
-                'Highest Price', 'Lowest Price', 'Opening Price', 'Trading Volume','Rolling Mean Closing Price']]
-        y = df['Next Day Closing Price']
-        
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-        
-        model = LinearRegression()
-        model.fit(X_train, y_train)
-        y_pred = model.predict(X_test)
-        
-        mse = mean_squared_error(y_test, y_pred)
-        r2 = model.score(X_test, y_test)
-        rmse = np.sqrt(mse)
-        percentage_rmse = (rmse / y_test.mean()) * 100
-        
-        # latest_data = df.iloc[[-1]][['Common Shares Outstanding', 'Last Closing Price', 'Adjusted Closing Price', 
-        #                             'Highest Price', 'Lowest Price', 'Opening Price', 'Trading Volume','Rolling Mean Closing Price']]
-        # next_day_prediction = model.predict(latest_data)
-
-        plt.figure(figsize=(12,6))
-        plt.plot(y_test.values, label='Actual')
-        plt.plot(y_pred, label='Predicted', linestyle='--')
-        plt.title('Actual vs Predicted Close Prices')
-        plt.xlabel('Test Samples')
-        plt.ylabel('Price')
-        plt.legend()
-        plt.grid(True)
-        plt.show()
-        
-        return mse, r2, rmse, percentage_rmse, df#, next_day_prediction[0], latest_data, next_day_prediction
 
     def multiModelTest(self,df):
             df['Rolling Mean Closing Price'] = df['Last Closing Price'].rolling(window=30).mean()
@@ -227,6 +213,39 @@ class pySimFin:
             results_df = pd.DataFrame(results).T.sort_values(by='Test MAE')
 
             return results_df
+    
+    def runBestModel(self,df,model_type):
+        df['Rolling Mean Closing Price'] = df['Last Closing Price'].rolling(window=30).mean()
+        df['Next Day Closing Price'] = df['Last Closing Price'].shift(-1)
+
+        df = df.dropna()
+        
+        X = df[['Common Shares Outstanding', 'Last Closing Price', 'Adjusted Closing Price', 
+                'Highest Price', 'Lowest Price', 'Opening Price', 'Trading Volume','Rolling Mean Closing Price']]
+        y = df['Next Day Closing Price']
+        
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+        
+        if model_type == 'Linear Regression':
+            model = LinearRegression()
+        elif model_type == 'XGBoost':
+            model = xgb.XGBRegressor(objective='reg:squarederror', random_state=42)
+        elif model_type == 'Random Forest':
+            model = RandomForestRegressor(random_state=42)
+        else:
+            raise ValueError("Invalid model_type. Choose from 'linear_regression', 'xgboost', or 'random_forest'.")
+        
+        # Fit model
+        model.fit(X_train, y_train)
+        y_pred = model.predict(X_test)
+        
+        # Calculate metrics
+        mse = mean_squared_error(y_test, y_pred)
+        r2 = model.score(X_test, y_test)
+        rmse = np.sqrt(mse)
+        percentage_rmse = (rmse / y_test.mean()) * 100
+        
+        return mse, r2, rmse, percentage_rmse, df
     
     def getLogo(self,ticker):
         api_url = f'https://api.api-ninjas.com/v1/logo?ticker={ticker}'

@@ -9,26 +9,15 @@ import plotly.graph_objects as go
 
 st.set_page_config(
     page_title="Stock Price Analysis",
-    page_icon='https://cdn.cookielaw.org/logos/e8ca50c1-d340-4b7f-b6e8-46a90c64bb3d/018fba4d-83ca-7f69-91e4-19e5d2ce04fb/b675201b-d73d-430b-8f8b-058904a17cc5/logo_IE_circle.png',
+    page_icon='Media/flexiTradeIcon.png',
     layout = 'wide'
 )
 
 
-st.markdown("""
-    <style>
-    .header {
-        background-color: #333;
-        color: white;
-        padding: 10px;
-        text-align: center;
-        font-size: 24px;
-    }
-    </style>
-    <div class="header">
-        <h1>Welcome to StockHub</h1>
-        <p>Your all-in-one stock analysis and prediction platform</p>
-    </div>
-""", unsafe_allow_html=True)
+col1, col2, col3 = st.columns([1,2,1])
+with col2:
+    st.image("Media/flexiTrade.png", width=800)
+
 
 import streamlit as st
 
