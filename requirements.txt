@@ -1,7 +1,9 @@
+--upgrade pip
+
 arch
 pandas
 plotly
 dotenv
 matplotlib
 simfin
-sklearn
+scikit-learn
